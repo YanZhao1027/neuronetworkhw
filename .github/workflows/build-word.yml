@@ -1,0 +1,29 @@
+name: Build editable Word
+on:
+  push:
+    paths:
+      - 'experiments/exp1/report.md'
+      - 'experiments/exp1/figures/**'
+      - '.github/workflows/build-word.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-word:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Pandoc
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y pandoc fonts-noto-cjk
+      - name: Convert Markdown to Word
+        working-directory: experiments/exp1
+        run: |
+          pandoc report.md --resource-path=. --standalone --from=gfm -o exp1-word-from-markdown.docx
+          test -s exp1-word-from-markdown.docx
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exp1-word-from-markdown
+          path: experiments/exp1/exp1-word-from-markdown.docx
+          retention-days: 90
